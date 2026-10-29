@@ -1,0 +1,824 @@
+<title>광명시 공시지가 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F4F6F3;
+    --surface:#FFFFFF;
+    --surface-sunken:#ECEFEA;
+    --border:#D7DED4;
+    --border-strong:#BCC6B6;
+    --ink:#1B2420;
+    --ink-secondary:#4B5850;
+    --ink-muted:#7C8880;
+    --accent:#2A6F63;
+    --accent-strong:#1E5349;
+    --accent-soft:#DCEBE6;
+    --accent-soft-strong:#BEDAD2;
+    --good:#2E8F55;
+    --good-soft:#DEEFE2;
+    --warning:#9B6A14;
+    --warning-soft:#F3E6C7;
+    --critical:#B03A30;
+    --critical-soft:#F6DCDA;
+    --div-up:#A6672E;
+    --div-up-soft:#F1DFC9;
+    --div-down:#3E6E93;
+    --div-down-soft:#DCE7ED;
+    --div-neutral:#9AA398;
+    --shadow: 0 1px 2px rgba(27,36,32,0.06), 0 4px 14px rgba(27,36,32,0.05);
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#141A17;
+      --surface:#1B2320;
+      --surface-sunken:#20291F;
+      --border:#323C33;
+      --border-strong:#44503F;
+      --ink:#EAF0EB;
+      --ink-secondary:#AEBDAF;
+      --ink-muted:#7D8C7E;
+      --accent:#5FB3A1;
+      --accent-strong:#86CDBB;
+      --accent-soft:#223832;
+      --accent-soft-strong:#2C4A41;
+      --good:#58B37D;
+      --good-soft:#1E3426;
+      --warning:#D6A23E;
+      --warning-soft:#3A2F17;
+      --critical:#E2776C;
+      --critical-soft:#3C2320;
+      --div-up:#D68F52;
+      --div-up-soft:#3A2D1C;
+      --div-down:#7FAED0;
+      --div-down-soft:#1F2E38;
+      --div-neutral:#6C766A;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141A17;
+    --surface:#1B2320;
+    --surface-sunken:#20291F;
+    --border:#323C33;
+    --border-strong:#44503F;
+    --ink:#EAF0EB;
+    --ink-secondary:#AEBDAF;
+    --ink-muted:#7D8C7E;
+    --accent:#5FB3A1;
+    --accent-strong:#86CDBB;
+    --accent-soft:#223832;
+    --accent-soft-strong:#2C4A41;
+    --good:#58B37D;
+    --good-soft:#1E3426;
+    --warning:#D6A23E;
+    --warning-soft:#3A2F17;
+    --critical:#E2776C;
+    --critical-soft:#3C2320;
+    --div-up:#D68F52;
+    --div-up-soft:#3A2D1C;
+    --div-down:#7FAED0;
+    --div-down-soft:#1F2E38;
+    --div-neutral:#6C766A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans KR", "Malgun Gothic", sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    padding:28px clamp(16px,4vw,40px) 56px;
+  }
+  h1,h2,h3{font-family:"Noto Serif KR","Malgun Gothic",serif; margin:0; text-wrap:balance;}
+  a{color:var(--accent);}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+  .mono{font-family:"JetBrains Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums;}
+
+  .page{max-width:1240px; margin:0 auto; display:flex; flex-direction:column; gap:22px;}
+
+  header.top{
+    display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:16px;
+    border-bottom:1px solid var(--border-strong); padding-bottom:18px;
+  }
+  .eyebrow{
+    font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent);
+    font-weight:600; margin:0 0 6px;
+  }
+  header.top h1{font-size:26px; font-weight:700; color:var(--ink);}
+  header.top .meta{color:var(--ink-muted); font-size:12.5px; margin-top:4px;}
+  header.top .meta b{color:var(--ink-secondary); font-weight:600;}
+  .asof{
+    text-align:right; font-size:12px; color:var(--ink-muted); display:flex; flex-direction:column; gap:2px;
+  }
+  .asof .val{font-family:"JetBrains Mono",monospace; color:var(--ink-secondary); font-size:13px;}
+
+  /* KPI strip */
+  .kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .kpi{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:16px 18px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px;
+  }
+  .kpi .label{font-size:12px; color:var(--ink-muted); font-weight:500;}
+  .kpi .value{font-family:"JetBrains Mono",monospace; font-size:24px; font-weight:600; color:var(--ink); letter-spacing:-0.01em;}
+  .kpi .sub{font-size:12px; color:var(--ink-secondary);}
+  .kpi .chip-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;}
+  .arrow-up::before{content:"▲ "; color:var(--div-up);}
+  .arrow-down::before{content:"▼ "; color:var(--div-down);}
+
+  .chip{
+    display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+    padding:3px 9px; border-radius:999px; line-height:1.4;
+  }
+  .chip.good{background:var(--good-soft); color:var(--good);}
+  .chip.warning{background:var(--warning-soft); color:var(--warning);}
+  .chip.critical{background:var(--critical-soft); color:var(--critical);}
+  .chip.neutral{background:var(--surface-sunken); color:var(--ink-secondary);}
+
+  /* main grid: map + charts */
+  .main-grid{display:grid; grid-template-columns:minmax(300px,380px) 1fr; gap:16px; align-items:start;}
+  @media (max-width:860px){ .main-grid{grid-template-columns:1fr;} .kpi-row{grid-template-columns:repeat(2,1fr);} }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:18px 20px;
+  }
+  .card h2{font-size:15px; font-weight:700; color:var(--ink);}
+  .card .card-desc{font-size:12px; color:var(--ink-muted); margin-top:3px; margin-bottom:14px;}
+
+  /* dong map */
+  .dong-map-wrap{margin-top:4px; display:flex; justify-content:center;}
+  .dong-map-svg{width:100%; max-height:520px; display:block;}
+  .dong-map-svg path{
+    stroke:var(--surface); stroke-width:2.5; cursor:pointer;
+    transition:filter .12s ease, stroke-width .12s ease;
+  }
+  .dong-map-svg path:hover{filter:brightness(1.08);}
+  .dong-map-svg path.selected{stroke:var(--accent-strong); stroke-width:4;}
+  .dong-map-svg path.dimmed{opacity:.35;}
+  @media (prefers-reduced-motion: reduce){ .dong-map-svg path{transition:none;} }
+  .dong-map-svg text{
+    font-family:"Noto Sans KR",sans-serif; font-size:30px; font-weight:700; fill:#15241E;
+    text-anchor:middle; pointer-events:none; paint-order:stroke; stroke:rgba(255,255,255,.65); stroke-width:5px;
+  }
+  .dong-map-svg text.price{font-size:22px; font-weight:500; fill:#2A3730;}
+  .map-legend{display:flex; align-items:center; gap:8px; margin-top:12px; font-size:11.5px; color:var(--ink-muted);}
+  .map-legend .ramp{width:120px; height:9px; border-radius:5px; background:linear-gradient(to right, var(--ramp-lo), var(--ramp-hi)); border:1px solid var(--border-strong);}
+  .map-note{font-size:11px; color:var(--ink-muted); margin-top:10px; line-height:1.5;}
+  .clear-filter{
+    margin-top:10px; font-size:12px; border:1px solid var(--border-strong); background:var(--surface);
+    color:var(--ink-secondary); border-radius:999px; padding:4px 11px; cursor:pointer;
+  }
+  .clear-filter:hover{background:var(--surface-sunken);}
+
+  .charts-col{display:flex; flex-direction:column; gap:16px;}
+
+  /* svg chart bits */
+  .chart-svg{width:100%; display:block; overflow:visible;}
+  .bar-label{font-size:11.5px; fill:var(--ink-secondary); font-family:"Noto Sans KR",sans-serif;}
+  .bar-value{font-size:11.5px; fill:var(--ink); font-weight:600; font-family:"JetBrains Mono",monospace;}
+  .grid-line{stroke:var(--border); stroke-width:1;}
+  .axis-text{font-size:10.5px; fill:var(--ink-muted); font-family:"JetBrains Mono",monospace;}
+  .hist-bar{cursor:default;}
+  .legend-row{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-secondary); margin-top:10px;}
+  .legend-row .sw{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+
+  #tooltip{
+    position:fixed; pointer-events:none; background:var(--ink); color:var(--bg); font-size:12px;
+    padding:7px 10px; border-radius:7px; line-height:1.45; box-shadow:var(--shadow); z-index:50;
+    max-width:240px; display:none; font-family:"Noto Sans KR",sans-serif;
+  }
+  #tooltip b{font-family:"JetBrains Mono",monospace;}
+
+  /* validation panel */
+  .panel-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:10px;}
+  .findings{display:flex; flex-direction:column; gap:7px; margin-top:12px; max-height:360px; overflow-y:auto; padding-right:4px;}
+  .finding{
+    display:grid; grid-template-columns:20px 90px 1fr 70px; gap:10px; align-items:center;
+    padding:9px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface-sunken);
+    font-size:12.5px;
+  }
+  .finding .sev-stripe{width:4px; height:20px; border-radius:3px; justify-self:center;}
+  .finding.critical .sev-stripe{background:var(--critical);}
+  .finding.warning .sev-stripe{background:var(--warning);}
+  .finding .loc{font-weight:600; color:var(--ink);}
+  .finding .loc span{display:block; font-size:11px; color:var(--ink-muted); font-weight:400;}
+  .finding .reasons{color:var(--ink-secondary);}
+  .finding .reasons em{font-style:normal; color:var(--ink); font-weight:600;}
+  .finding .sevtag{text-align:right;}
+  details.rules{margin-top:14px; font-size:12px; color:var(--ink-secondary);}
+  details.rules summary{cursor:pointer; color:var(--accent); font-weight:600; font-size:12.5px;}
+  details.rules ul{margin:10px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px;}
+
+  /* table */
+  .table-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;}
+  .table-toolbar input[type="text"]{
+    flex:1 1 220px; padding:8px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--ink); font-size:13px;
+  }
+  .table-toolbar select{
+    padding:8px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--ink); font-size:13px;
+  }
+  .toggle-flagged{
+    display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-secondary);
+    border:1px solid var(--border-strong); border-radius:999px; padding:6px 12px; cursor:pointer; user-select:none;
+    background:var(--surface);
+  }
+  .toggle-flagged.active{background:var(--accent-soft); color:var(--accent-strong); border-color:var(--accent);}
+  .table-wrap{overflow-x:auto; overflow-y:auto; max-height:560px; border:1px solid var(--border); border-radius:var(--radius-md);}
+  table{border-collapse:collapse; width:100%; min-width:920px; font-size:12.5px;}
+  thead th{
+    position:sticky; top:0; background:var(--surface-sunken); text-align:left; padding:9px 10px;
+    font-weight:600; color:var(--ink-secondary); border-bottom:1px solid var(--border-strong); cursor:pointer;
+    white-space:nowrap; font-size:12px;
+  }
+  thead th:hover{color:var(--accent-strong);}
+  thead th.sorted::after{content:" " attr(data-dir);}
+  tbody td{padding:7px 10px; border-bottom:1px solid var(--border); color:var(--ink-secondary); white-space:nowrap;}
+  tbody tr:hover{background:var(--surface-sunken);}
+  tbody tr.flag-critical{box-shadow:inset 3px 0 0 var(--critical);}
+  tbody tr.flag-warning{box-shadow:inset 3px 0 0 var(--warning);}
+  td.num{text-align:right; font-family:"JetBrains Mono",monospace;}
+  td.pnu{font-family:"JetBrains Mono",monospace; color:var(--ink-muted); font-size:11.5px;}
+  .table-foot{display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:12px; color:var(--ink-muted);}
+  .more-btn{
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--accent-strong); font-weight:600;
+    border-radius:999px; padding:7px 16px; cursor:pointer; font-size:12.5px;
+  }
+  .more-btn:hover{background:var(--accent-soft);}
+  .more-btn:disabled{opacity:.4; cursor:default;}
+
+  footer.note{font-size:11.5px; color:var(--ink-muted); text-align:center; padding-top:4px;}
+</style>
+
+<div class="page">
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">광명시 · 토지정보 데이터 검증</p>
+      <h1>광명시 개별공시지가 대시보드</h1>
+      <p class="meta">파일 <b>4. 광명시_개별공시지가_실습용.csv</b> · 공시지가 <b>2025 → 2026</b> 비교 · 자동 검증 규칙 7종 적용</p>
+    </div>
+    <div class="asof">
+      <span>조회 기준일</span>
+      <span class="val" id="asofDate">2026-10-29</span>
+    </div>
+  </header>
+
+  <section class="kpi-row" id="kpiRow" aria-label="요약 지표">
+    <div class="kpi"><span class="label">총 조사 필지</span><span class="value" id="kpiTotal">–</span><span class="sub">8개 법정동</span></div>
+    <div class="kpi"><span class="label">평균 공시지가 (2026)</span><span class="value" id="kpiAvgPrice">–</span><span class="sub">㎡당, 유효값 기준</span></div>
+    <div class="kpi"><span class="label">전년 대비 평균 변동률</span><span class="value" id="kpiChange">–</span><span class="sub" id="kpiChangeSub">전년 대비</span></div>
+    <div class="kpi"><span class="label">검증 플래그</span><span class="value" id="kpiFlags">–</span><span class="chip-row" id="kpiFlagChips"></span></div>
+  </section>
+
+  <section class="main-grid">
+    <div class="card">
+      <h2>법정동 경계 지도</h2>
+      <p class="card-desc">행정동 경계(2023.07 국가통계포털 기준)를 법정동 단위로 병합한 실제 윤곽입니다. 클릭하면 아래 차트·표가 해당 법정동으로 필터링됩니다.</p>
+      <div class="dong-map-wrap"><svg class="dong-map-svg" id="dongMapSvg" viewBox="0 0 1000 1512.1"></svg></div>
+      <div class="map-legend">
+        <span>평균 공시지가(2026)</span>
+        <span class="ramp" id="mapRamp"></span>
+        <span id="mapRampLabels"></span>
+      </div>
+      <button class="clear-filter" id="clearDongBtn" hidden>법정동 필터 해제 ✕</button>
+      <p class="map-note">※ 노온사동·가학동은 행정동 '학온동' 하나로만 경계가 공개되어 있어 지도에서는 한 구역으로 표시됩니다 (차트·표·검증 결과는 두 법정동을 구분해서 집계합니다).</p>
+    </div>
+
+    <div class="charts-col">
+      <div class="card">
+        <h2>법정동별 평균 공시지가</h2>
+        <p class="card-desc">㎡당 평균, 2026년 기준 · 내림차순</p>
+        <svg class="chart-svg" id="chartDong" viewBox="0 0 640 230"></svg>
+      </div>
+      <div class="card">
+        <h2>지목별 평균 공시지가</h2>
+        <p class="card-desc">㎡당 평균, 2026년 기준 · 내림차순</p>
+        <svg class="chart-svg" id="chartJimok" viewBox="0 0 640 230"></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>전년 대비 변동률 분포</h2>
+    <p class="card-desc">공시지가_2025 → 2026 변동률(%) 구간별 필지 수</p>
+    <svg class="chart-svg" id="chartHist" viewBox="0 0 980 220"></svg>
+    <div class="legend-row">
+      <span><span class="sw" style="background:var(--div-down);"></span>감소 구간</span>
+      <span><span class="sw" style="background:var(--div-neutral);"></span>변동 미미 (±5% 이내)</span>
+      <span><span class="sw" style="background:var(--div-up);"></span>증가 구간</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="panel-head">
+      <h2>검증 결과 — 확인이 필요한 필지</h2>
+      <span class="chip neutral" id="findingCount">0건</span>
+    </div>
+    <p class="card-desc">PNU 형식·중복, 법정동 코드 일치, 결측값, 면적 0, 변동률 이상치, 소재지 표기 오류를 자동 점검한 결과입니다. 행을 클릭하면 표에서 해당 필지로 이동합니다.</p>
+    <div class="findings" id="findingsList"></div>
+    <details class="rules">
+      <summary>적용한 검증 규칙 7종 보기</summary>
+      <ul>
+        <li><b>PNU 형식</b> — 19자리 숫자가 아니면 오류</li>
+        <li><b>PNU·법정동 코드 일치</b> — PNU 6~8번째 자리(읍면동 코드)와 법정동 컬럼 값을 상호 검증</li>
+        <li><b>PNU 중복</b> — 동일 PNU가 2건 이상이면 중복 입력</li>
+        <li><b>결측값</b> — 법정동·지번·지목·용도지역·면적·공시지가 중 공란 항목 탐지 (2026년 값 결측은 심각)</li>
+        <li><b>면적 0㎡</b> — 유효하지 않은 면적</li>
+        <li><b>변동률 이상치</b> — 전년 대비 ±50% 이상은 심각, ±15~50%는 주의</li>
+        <li><b>소재지 표기</b> — "광명시" 누락 또는 소재지 문자열에 법정동명이 포함되지 않는 경우(오타 의심)</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>전체 필지 데이터</h2>
+    <p class="card-desc">검색·필터·정렬 후 필요한 범위만 확인하세요.</p>
+    <div class="table-toolbar">
+      <input type="text" id="searchInput" placeholder="소재지, 지번, PNU 검색…">
+      <select id="dongSelect"><option value="">법정동 전체</option></select>
+      <select id="jimokSelect"><option value="">지목 전체</option></select>
+      <div class="toggle-flagged" id="flagOnlyToggle">⚠ 플래그만 보기</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="idx">연번</th>
+            <th data-key="dong">법정동</th>
+            <th data-key="jibun">지번</th>
+            <th data-key="jimok">지목</th>
+            <th data-key="area">면적(㎡)</th>
+            <th data-key="zone">용도지역</th>
+            <th data-key="p2025">공시지가_2025</th>
+            <th data-key="p2026">공시지가_2026</th>
+            <th data-key="pct">변동률</th>
+            <th data-key="flag">검증</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="table-foot">
+      <span id="rowCountLabel">0 / 0건 표시</span>
+      <button class="more-btn" id="moreBtn">50건 더 보기</button>
+    </div>
+  </section>
+
+  <footer class="note">실습용 데이터 기반 · 공시지가는 ㎡당 원(₩) 단위 · 클라이언트에서 전량 계산되며 서버로 전송되지 않습니다.</footer>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const JIMOK_NAME = {대:'대지',전:'전',답:'답',임:'임야',도:'도로',학:'학교용지',공:'공장용지',잡:'잡종지'};
+const DONG_CODE = {101:'광명동',102:'철산동',103:'하안동',104:'소하동',105:'일직동',106:'노온사동',107:'가학동',108:'옥길동'};
+const DONG_ORDER = ['광명동','철산동','일직동','하안동','옥길동','소하동','가학동','노온사동'];
+
+// Real boundaries: 19 행정동 polygons (vuski/admdongkor, 2023-07) merged to 법정동 via
+// Wikipedia 연혁 lookup (옥길동←광명6동, 가학동+노온사동←학온동, confirmed 2026-10-29) and
+// equirectangular-projected around 광명시 centroid. See build-geo.js for the derivation.
+const DONG_GEO = {"viewBox":"0 0 1000.0 1512.1","dong":{"광명동":{"d":"M231.75,609.81L244.01,616.29L252.75,621.51L265.19,631.29L268.61,635.71L310.28,627.34L312.26,618.48L318.41,611.40L342.71,613.32L382.00,611.53L395.54,610.87L396.77,610.52L397.88,609.94L398.69,609.40L415.47,595.43L422.53,549.07L429.58,500.67L461.99,456.32L470.88,436.55L483.38,402.46L475.63,354.48L466.03,345.71L465.08,344.84L463.75,343.62L459.60,344.64L468.35,319.69L488.06,327.33L479.98,264.27L491.04,235.28L493.47,188.24L489.73,180.99L487.10,175.56L508.58,151.57L510.23,149.93L511.20,148.97L513.12,147.53L514.35,146.62L528.30,136.97L535.38,132.23L541.89,107.67L543.97,99.41L544.97,91.96L498.34,121.66L483.88,130.10L482.15,131.89L480.89,133.20L476.66,138.51L450.90,175.61L442.20,188.17L440.28,190.93L434.72,196.92L420.61,200.08L384.87,245.41L384.46,245.92L382.02,248.90L380.09,250.57L374.03,255.79L367.08,259.83L366.08,260.41L361.39,260.99L356.55,261.58L351.20,260.93L343.89,260.03L322.97,253.27L322.14,251.73L323.30,249.61L302.22,259.31L296.91,289.20L295.85,311.26L295.81,312.01L295.20,322.76L294.33,335.74L291.19,366.04L295.83,369.51L305.16,373.27L324.04,380.63L326.17,375.66L343.06,373.76L346.32,373.45L365.30,375.37L393.36,393.61L392.57,396.38L385.21,421.20L384.28,423.05L367.17,455.27L354.24,460.10L352.49,460.75L351.11,461.26L341.18,464.73L331.81,467.86L327.02,466.41L323.28,465.27L322.31,464.98L319.03,463.98L284.66,415.14L254.05,469.74L247.12,484.47L247.50,496.39L247.67,497.07L248.22,499.26L254.63,524.94L256.28,531.52L257.04,539.51L256.89,546.01L250.70,571.56L239.20,603.04L231.75,609.81Z","cx":379.83,"cy":404.72},"옥길동":{"d":"M291.19,366.04L295.83,369.51L305.16,373.27L324.04,380.63L326.17,375.66L343.06,373.76L346.32,373.45L365.30,375.37L393.36,393.61L392.57,396.38L385.21,421.20L384.28,423.05L367.17,455.27L354.24,460.10L352.49,460.75L351.11,461.26L341.18,464.73L331.81,467.86L327.02,466.41L323.28,465.27L322.31,464.98L319.03,463.98L284.66,415.14L254.05,469.74L247.12,484.47L247.50,496.39L247.67,497.07L248.22,499.26L254.63,524.94L256.28,531.52L257.04,539.51L256.89,546.01L250.70,571.56L239.20,603.04L231.75,609.81L211.86,646.16L194.55,615.73L168.84,599.58L97.14,603.79L90.34,588.72L84.83,587.82L60.00,591.02L69.26,557.35L78.42,537.78L80.19,534.28L92.48,523.03L108.55,511.87L113.62,510.30L119.67,501.49L133.52,491.15L142.86,492.45L147.95,475.85L148.75,470.92L149.00,464.12L148.98,452.75L141.23,425.94L136.22,404.76L131.57,382.50L134.17,341.69L134.31,340.60L134.67,339.76L135.00,339.43L135.27,339.15L147.81,330.72L175.96,355.22L188.44,358.27L189.08,358.15L191.77,357.56L194.13,357.06L207.67,353.44L211.96,352.14L222.53,358.26L223.00,359.08L225.61,362.20L227.17,362.91L235.63,364.56L237.54,364.76L242.31,363.40L246.24,362.08L247.70,361.64L248.88,361.73L250.02,362.16L251.26,362.02L252.55,361.66L253.60,361.14L253.94,360.91L254.44,360.64L256.14,360.17L257.63,360.13L258.45,360.22L260.04,360.56L264.36,361.62L266.60,363.62L267.72,365.77L268.24,367.53L275.06,373.55L280.19,374.97L285.21,376.31L288.56,376.84L290.45,372.72L291.06,369.85L291.10,368.84L291.19,366.04Z","cx":211.56,"cy":475.31},"철산동":{"d":"M459.60,344.64L463.75,343.62L465.08,344.84L466.03,345.71L475.63,354.48L483.38,402.46L470.88,436.55L480.53,440.52L519.59,465.03L520.76,463.70L521.57,462.79L536.00,444.79L544.85,430.44L545.67,427.80L545.80,424.80L545.29,422.24L544.64,420.25L542.44,415.57L562.59,429.03L563.54,432.14L592.98,428.82L593.74,428.69L594.34,428.58L595.83,428.10L597.38,427.33L599.54,425.90L601.90,420.37L602.71,418.36L604.51,413.90L607.80,414.48L629.04,455.97L629.91,457.92L635.72,456.61L705.75,405.90L696.79,392.04L696.39,391.38L695.19,389.41L692.10,384.30L688.18,377.81L686.30,374.59L679.83,363.47L676.12,356.42L674.15,352.66L672.29,349.12L669.49,343.41L658.54,320.94L658.39,320.58L654.31,311.23L652.36,306.73L647.53,295.27L646.31,292.38L640.82,278.04L635.63,263.72L626.09,235.08L626.89,209.53L635.93,204.61L640.76,188.20L642.35,157.74L612.76,153.72L580.47,107.39L575.83,98.47L575.35,85.33L567.03,60.05L559.92,60.00L544.97,91.96L543.97,99.41L541.89,107.67L535.38,132.23L528.30,136.97L514.35,146.62L513.12,147.53L511.20,148.97L510.23,149.93L508.58,151.57L487.10,175.56L489.73,180.99L493.47,188.24L491.04,235.28L479.98,264.27L488.06,327.33L468.35,319.69L459.60,344.64Z","cx":569.75,"cy":295.56},"하안동":{"d":"M415.47,595.43L426.33,610.20L424.64,684.52L428.95,726.26L431.84,734.45L454.95,779.50L457.07,781.89L457.64,782.22L460.50,783.88L466.11,787.13L477.36,791.98L506.78,808.47L537.92,825.96L561.63,796.86L565.24,792.41L582.70,758.23L597.61,729.04L644.16,689.81L660.06,684.56L666.16,685.88L673.79,687.54L678.16,688.50L681.19,687.74L684.84,686.73L689.39,682.91L710.79,659.22L698.60,640.73L696.52,637.61L689.46,627.08L712.50,635.86L773.35,638.71L771.26,633.15L760.30,581.25L769.52,572.61L776.83,567.64L787.99,565.36L792.21,567.20L795.14,568.79L797.12,569.83L799.56,569.77L800.18,569.76L800.51,569.58L802.67,568.42L803.78,566.42L805.08,563.54L805.48,561.41L805.30,559.37L800.17,545.37L777.93,512.59L769.65,500.62L766.30,495.65L705.75,405.90L635.72,456.61L629.91,457.92L629.04,455.97L607.80,414.48L604.51,413.90L602.71,418.36L601.90,420.37L599.54,425.90L597.38,427.33L595.83,428.10L594.34,428.58L593.74,428.69L592.98,428.82L563.54,432.14L562.59,429.03L542.44,415.57L544.64,420.25L545.29,422.24L545.80,424.80L545.67,427.80L544.85,430.44L536.00,444.79L521.57,462.79L520.76,463.70L519.59,465.03L480.53,440.52L470.88,436.55L461.99,456.32L429.58,500.67L422.53,549.07L415.47,595.43Z","cx":582.26,"cy":592.94},"소하동":{"d":"M522.80,953.28L524.56,963.91L527.19,979.68L538.38,1005.10L555.65,1045.17L553.76,1050.68L548.93,1058.07L548.29,1059.05L548.72,1065.68L549.50,1077.76L553.09,1080.75L565.36,1090.95L580.22,1108.81L585.62,1115.31L610.72,1119.94L620.76,1111.11L637.24,1103.16L651.07,1112.29L664.89,1120.04L674.50,1115.36L693.66,1096.33L711.94,1084.22L733.97,1082.23L764.57,1058.05L799.44,1055.05L833.35,992.46L866.29,1001.16L879.88,1009.70L884.99,1019.04L904.47,1014.32L905.76,1013.96L908.33,1013.22L917.87,992.31L923.44,973.34L924.39,970.05L927.31,953.29L928.29,928.66L930.04,917.54L940.00,918.93L926.93,907.28L926.46,906.58L923.74,902.49L923.30,901.70L923.06,901.26L921.74,898.80L921.01,897.45L919.76,892.88L919.12,889.94L919.99,889.08L923.56,885.61L923.77,864.18L921.53,844.25L916.62,822.16L913.25,810.43L888.42,792.69L876.24,754.34L873.11,718.30L864.22,691.66L847.15,702.37L845.19,702.08L812.65,696.35L811.66,695.95L810.52,693.32L809.98,689.96L782.69,648.04L773.35,638.71L712.50,635.86L689.46,627.08L696.52,637.61L698.60,640.73L710.79,659.22L689.39,682.91L684.84,686.73L681.19,687.74L678.16,688.50L673.79,687.54L666.16,685.88L660.06,684.56L644.16,689.81L597.61,729.04L582.70,758.23L565.24,792.41L561.63,796.86L537.92,825.96L537.16,837.90L535.16,869.50L535.77,870.72L537.25,873.68L537.66,874.50L538.20,875.58L538.28,877.15L539.44,897.65L534.49,919.57L524.11,943.79L523.96,944.91L523.80,946.02L522.80,953.28Z","cx":719.84,"cy":884.66},"일직동":{"d":"M610.72,1119.94L620.76,1111.11L637.24,1103.16L651.07,1112.29L664.89,1120.04L674.50,1115.36L693.66,1096.33L711.94,1084.22L733.97,1082.23L764.57,1058.05L799.44,1055.05L833.35,992.46L866.29,1001.16L879.88,1009.70L884.99,1019.04L873.77,1028.78L870.09,1032.91L868.93,1034.49L867.07,1037.04L864.17,1042.82L870.57,1051.34L875.12,1050.76L879.13,1050.05L882.83,1051.80L883.95,1052.33L888.13,1054.35L890.17,1055.91L893.68,1061.77L894.66,1064.24L896.09,1068.12L896.81,1070.90L892.61,1093.50L862.85,1152.21L838.42,1169.32L820.27,1171.22L814.46,1178.38L803.66,1193.98L802.82,1198.03L803.28,1199.72L803.50,1200.54L803.75,1201.47L804.51,1204.25L808.77,1209.18L811.45,1210.50L803.21,1287.89L697.26,1323.04L652.91,1311.66L651.81,1310.39L643.80,1303.25L641.84,1301.67L640.36,1300.90L601.93,1289.35L594.58,1288.01L579.36,1243.76L579.29,1242.92L576.10,1205.27L575.14,1169.73L575.12,1169.09L575.15,1168.27L581.61,1146.68L596.98,1140.26L610.72,1119.94Z","cx":730.48,"cy":1174.63},"학온동":{"d":"M537.92,825.96L537.16,837.90L535.16,869.50L535.77,870.72L537.25,873.68L537.66,874.50L538.20,875.58L538.28,877.15L539.44,897.65L534.49,919.57L524.11,943.79L523.96,944.91L523.80,946.02L522.80,953.28L524.56,963.91L527.19,979.68L538.38,1005.10L555.65,1045.17L553.76,1050.68L548.93,1058.07L548.29,1059.05L548.72,1065.68L549.50,1077.76L553.09,1080.75L565.36,1090.95L580.22,1108.81L585.62,1115.31L610.72,1119.94L596.98,1140.26L581.61,1146.68L575.15,1168.27L575.12,1169.09L575.14,1169.73L576.10,1205.27L579.29,1242.92L579.36,1243.76L594.58,1288.01L592.58,1294.03L588.36,1319.03L583.46,1354.02L583.67,1358.09L583.85,1361.19L584.55,1364.20L585.30,1367.26L587.18,1371.88L589.16,1374.39L590.47,1375.09L591.07,1375.18L594.29,1375.65L598.24,1375.70L601.34,1375.74L608.11,1375.59L613.08,1374.97L614.30,1374.68L619.91,1373.67L622.07,1373.46L625.29,1373.15L629.72,1372.82L630.42,1372.76L634.57,1372.46L638.08,1372.59L641.75,1373.04L643.82,1373.61L645.73,1374.79L647.48,1376.39L647.89,1376.77L666.25,1401.85L667.38,1404.06L667.66,1407.64L665.94,1424.70L662.63,1444.11L638.82,1451.24L632.47,1449.51L631.19,1449.16L628.35,1448.38L611.78,1445.69L587.14,1442.60L585.24,1442.67L583.26,1442.73L564.52,1444.36L529.57,1450.57L485.10,1452.14L453.81,1448.02L434.56,1441.36L387.95,1393.28L388.65,1389.28L377.32,1351.29L369.09,1344.05L313.72,1306.50L310.06,1304.38L306.33,1301.08L302.95,1294.46L300.26,1289.18L294.08,1254.85L290.96,1236.42L279.95,1162.79L285.21,1144.37L287.84,1141.38L288.26,1141.13L290.12,1139.99L290.88,1138.09L290.68,1133.91L283.37,1120.14L275.06,1110.08L262.51,1096.98L248.44,1082.28L248.25,1060.36L232.81,1017.56L226.17,1002.96L228.80,992.89L232.94,982.23L235.00,979.73L236.53,977.87L239.37,976.52L243.32,975.46L245.21,974.96L247.59,971.89L246.25,962.55L238.00,948.43L236.10,945.76L222.64,930.22L216.02,927.56L211.10,927.00L207.96,929.55L199.72,925.30L198.66,843.45L199.17,834.92L206.30,787.15L207.54,720.10L203.32,687.12L211.86,646.16L231.75,609.81L244.01,616.29L252.75,621.51L265.19,631.29L268.61,635.71L310.28,627.34L312.26,618.48L318.41,611.40L342.71,613.32L382.00,611.53L395.54,610.87L396.77,610.52L397.88,609.94L398.69,609.40L415.47,595.43L426.33,610.20L424.64,684.52L428.95,726.26L431.84,734.45L454.95,779.50L457.07,781.89L457.64,782.22L460.50,783.88L466.11,787.13L477.36,791.98L506.78,808.47L537.92,825.96Z","cx":403.33,"cy":1035.78}}};
+
+// map region key -> which 법정동 values it represents (학온동 covers two legal dongs)
+const MAP_REGIONS = [
+  {key:'광명동', label:'광명동', dongs:['광명동']},
+  {key:'옥길동', label:'옥길동', dongs:['옥길동']},
+  {key:'철산동', label:'철산동', dongs:['철산동']},
+  {key:'하안동', label:'하안동', dongs:['하안동']},
+  {key:'소하동', label:'소하동', dongs:['소하동']},
+  {key:'일직동', label:'일직동', dongs:['일직동']},
+  {key:'학온동', label:'가학동·노온사동', dongs:['가학동','노온사동']},
+];
+
+let rows = [];
+let flaggedMap = new Map(); // idx -> [{sev, msg}]
+let selectedRegionKey = null;
+let selectedDongList = null; // array of 법정동 names, or null = all
+let sortKey = 'idx', sortDir = 1;
+let visibleCount = 50;
+
+fetch('data.csv').then(r=>r.text()).then(parse).catch(err=>{
+  document.getElementById('tableBody').innerHTML = '<tr><td colspan="10">데이터를 불러오지 못했습니다: '+err+'</td></tr>';
+});
+
+function parse(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
+  lines.shift(); // header
+  rows = lines.map(line=>{
+    const c = line.split(',');
+    return {
+      idx: +c[0],
+      pnu: (c[1]||'').trim(),
+      jiju: (c[2]||'').trim(),
+      dong: (c[3]||'').trim(),
+      jibun: (c[4]||'').trim(),
+      jimok: (c[5]||'').trim(),
+      area: c[6]!==undefined && c[6]!=='' ? parseFloat(c[6]) : null,
+      zone: (c[7]||'').trim(),
+      p2025: c[8]!==undefined && c[8]!=='' ? parseFloat(c[8]) : null,
+      p2026: c[9]!==undefined && c[9]!=='' ? parseFloat(c[9]) : null,
+    };
+  });
+  validate();
+  buildFilters();
+  renderKPI();
+  renderMap();
+  renderCharts();
+  renderFindings();
+  renderTable(true);
+}
+
+function validate(){
+  flaggedMap = new Map();
+  const pnuCount = new Map();
+  rows.forEach(r=>pnuCount.set(r.pnu, (pnuCount.get(r.pnu)||0)+1));
+
+  rows.forEach(r=>{
+    const flags = [];
+    const add = (sev,msg)=>flags.push({sev,msg});
+
+    const pnuValid = /^\d{19}$/.test(r.pnu);
+    if(!pnuValid) add('critical', `PNU 형식 오류 (19자리 숫자 아님, 현재 ${r.pnu.length}자리)`);
+
+    if(pnuValid){
+      const code = +r.pnu.substring(5,8);
+      const expectedDong = DONG_CODE[code];
+      if(expectedDong && r.dong && expectedDong!==r.dong){
+        add('critical', `PNU 법정동코드(${code})는 '${expectedDong}'인데 법정동 컬럼은 '${r.dong}'`);
+      }
+    }
+
+    if((pnuCount.get(r.pnu)||0) > 1) add('critical', 'PNU 중복 입력 (동일 필지 중복)');
+
+    if(!r.dong) add('warning', '법정동 결측');
+    if(!r.jibun) add('warning', '지번 결측');
+    if(!r.jimok) add('warning', '지목 결측');
+    if(!r.zone) add('warning', '용도지역 결측');
+    if(r.area===null) add('warning', '면적 결측');
+    else if(r.area===0) add('critical', '면적 0㎡ (유효하지 않은 면적)');
+    if(r.p2025===null) add('warning', '공시지가_2025 결측');
+    if(r.p2026===null) add('critical', '공시지가_2026 결측');
+
+    if(r.p2025!==null && r.p2026!==null && r.p2025!==0){
+      const pct = (r.p2026-r.p2025)/r.p2025*100;
+      r.pct = pct;
+      if(Math.abs(pct)>=50) add('critical', `변동률 이상치 (${pct.toFixed(1)}%, 전년 대비 급등락)`);
+      else if(Math.abs(pct)>=15) add('warning', `변동률 주의 (${pct.toFixed(1)}%)`);
+    } else { r.pct = null; }
+
+    if(r.jiju){
+      if(!r.jiju.includes('광명시')) add('warning', '소재지에 "광명시" 표기 누락/오타 의심');
+      if(r.dong && !r.jiju.includes(r.dong)) add('warning', `소재지 문자열에 법정동명('${r.dong}') 불일치 — 오타 의심`);
+    }
+
+    if(flags.length) flaggedMap.set(r.idx, flags);
+  });
+}
+
+function sevOf(idx){
+  const f = flaggedMap.get(idx);
+  if(!f) return null;
+  return f.some(x=>x.sev==='critical') ? 'critical' : 'warning';
+}
+
+function fmtWon(v){ return v==null ? '—' : Math.round(v).toLocaleString('ko-KR'); }
+function fmtManwon(v){ return v==null ? '—' : (v/10000).toFixed(1)+'만원'; }
+function fmtPct(v){ return v==null ? '—' : (v>0?'+':'')+v.toFixed(1)+'%'; }
+
+function buildFilters(){
+  const dongSel = document.getElementById('dongSelect');
+  DONG_ORDER.forEach(d=>{
+    const o=document.createElement('option'); o.value=d; o.textContent=d; dongSel.appendChild(o);
+  });
+  const jimokSet = [...new Set(rows.map(r=>r.jimok).filter(Boolean))].sort();
+  const jimokSel = document.getElementById('jimokSelect');
+  jimokSet.forEach(j=>{
+    const o=document.createElement('option'); o.value=j; o.textContent=(JIMOK_NAME[j]||j)+' ('+j+')'; jimokSel.appendChild(o);
+  });
+  dongSel.addEventListener('change', ()=>{
+    selectedRegionKey = null;
+    selectedDongList = dongSel.value ? [dongSel.value] : null;
+    syncDongUI(); visibleCount=50; renderTable(true);
+  });
+  jimokSel.addEventListener('change', ()=>{ visibleCount=50; renderTable(true); });
+  document.getElementById('searchInput').addEventListener('input', ()=>{ visibleCount=50; renderTable(true); });
+  document.getElementById('flagOnlyToggle').addEventListener('click', (e)=>{
+    e.currentTarget.classList.toggle('active'); visibleCount=50; renderTable(true);
+  });
+  document.getElementById('clearDongBtn').addEventListener('click', ()=>{
+    selectedRegionKey=null; selectedDongList=null; syncDongUI(); visibleCount=50; renderTable(true);
+  });
+  document.getElementById('moreBtn').addEventListener('click', ()=>{ visibleCount+=50; renderTable(false); });
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const key = th.dataset.key;
+      if(sortKey===key) sortDir*=-1; else { sortKey=key; sortDir=1; }
+      document.querySelectorAll('thead th').forEach(t=>{t.classList.remove('sorted'); t.removeAttribute('data-dir');});
+      th.classList.add('sorted'); th.setAttribute('data-dir', sortDir===1?'▲':'▼');
+      renderTable(true);
+    });
+  });
+}
+
+function syncDongUI(){
+  document.getElementById('dongSelect').value = (selectedDongList && selectedDongList.length===1) ? selectedDongList[0] : '';
+  document.getElementById('clearDongBtn').hidden = !selectedDongList;
+  document.querySelectorAll('.dong-map-svg path').forEach(p=>{
+    p.classList.toggle('selected', p.dataset.regionKey===selectedRegionKey);
+    p.classList.toggle('dimmed', !!selectedRegionKey && p.dataset.regionKey!==selectedRegionKey);
+  });
+}
+
+function renderKPI(){
+  document.getElementById('kpiTotal').textContent = rows.length.toLocaleString('ko-KR')+'건';
+  const valid26 = rows.map(r=>r.p2026).filter(v=>v!==null);
+  const avg26 = valid26.reduce((a,b)=>a+b,0)/valid26.length;
+  document.getElementById('kpiAvgPrice').textContent = fmtManwon(avg26)+'/㎡';
+
+  const pcts = rows.map(r=>r.pct).filter(v=>v!==null);
+  const avgPct = pcts.reduce((a,b)=>a+b,0)/pcts.length;
+  const kc = document.getElementById('kpiChange');
+  kc.textContent = (avgPct>=0?'+':'')+avgPct.toFixed(1)+'%';
+  kc.className = 'value ' + (avgPct>=0?'arrow-up':'arrow-down');
+  document.getElementById('kpiChangeSub').textContent = '유효 '+pcts.length+'건 평균';
+
+  const crit = [...flaggedMap.values()].filter(f=>f.some(x=>x.sev==='critical')).length;
+  const warn = flaggedMap.size - crit;
+  document.getElementById('kpiFlags').textContent = flaggedMap.size+'건';
+  document.getElementById('kpiFlagChips').innerHTML =
+    `<span class="chip critical">심각 ${crit}</span><span class="chip warning">주의 ${warn}</span>`;
+}
+
+function renderMap(){
+  // aggregate per map region (학온동 region combines 가학동+노온사동)
+  const regionStats = MAP_REGIONS.map(region=>{
+    const matched = rows.filter(r=>region.dongs.includes(r.dong));
+    const valid = matched.map(r=>r.p2026).filter(v=>v!==null);
+    const avg = valid.length ? valid.reduce((a,b)=>a+b,0)/valid.length : 0;
+    return {...region, cnt:matched.length, avg};
+  });
+  const avgs = regionStats.map(r=>r.avg).filter(v=>v>0);
+  const min = Math.min(...avgs), max = Math.max(...avgs);
+
+  const lo = getComputedStyle(document.documentElement).getPropertyValue('--accent-soft').trim();
+  const hi = getComputedStyle(document.documentElement).getPropertyValue('--accent-strong').trim();
+  document.getElementById('mapRamp').style.setProperty('--ramp-lo', lo);
+  document.getElementById('mapRamp').style.setProperty('--ramp-hi', hi);
+  document.getElementById('mapRampLabels').textContent = fmtManwon(min)+' ~ '+fmtManwon(max);
+
+  const svg = document.getElementById('dongMapSvg');
+  svg.setAttribute('viewBox', DONG_GEO.viewBox);
+  let html = '';
+  regionStats.forEach(region=>{
+    const geo = DONG_GEO.dong[region.key];
+    if(!geo) return;
+    const t = region.avg>0 ? (region.avg-min)/((max-min)||1) : 0;
+    html += `<path d="${geo.d}" data-region-key="${region.key}" fill="${mixColor(t)}"
+      data-tip="${region.label}|${fmtManwon(region.avg)}/㎡|${region.cnt}건"></path>`;
+  });
+  regionStats.forEach(region=>{
+    const geo = DONG_GEO.dong[region.key];
+    if(!geo) return;
+    html += `<text x="${geo.cx}" y="${geo.cy}">${region.label}</text>`;
+    html += `<text class="price" x="${geo.cx}" y="${geo.cy+30}">${fmtManwon(region.avg)}</text>`;
+  });
+  svg.innerHTML = html;
+
+  svg.querySelectorAll('path').forEach(p=>{
+    p.addEventListener('click', ()=>{
+      const key = p.dataset.regionKey;
+      if(selectedRegionKey===key){ selectedRegionKey=null; selectedDongList=null; }
+      else { selectedRegionKey=key; selectedDongList = MAP_REGIONS.find(r=>r.key===key).dongs; }
+      syncDongUI(); visibleCount=50; renderTable(true);
+    });
+  });
+  attachBarTips(svg);
+  syncDongUI();
+}
+
+function mixColor(t){
+  // interpolate accent-soft -> accent-strong in RGB
+  const a = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent-soft').trim());
+  const b = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent-strong').trim());
+  const r = Math.round(a.r+(b.r-a.r)*t), g = Math.round(a.g+(b.g-a.g)*t), bl = Math.round(a.b+(b.b-a.b)*t);
+  return `rgb(${r},${g},${bl})`;
+}
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+  const n = parseInt(hex,16);
+  return {r:(n>>16)&255, g:(n>>8)&255, b:n&255};
+}
+
+function showTip(html, evt){
+  const tip = document.getElementById('tooltip');
+  tip.innerHTML = html; tip.style.display='block';
+  const x = evt.clientX+14, y = evt.clientY+14;
+  tip.style.left = Math.min(x, window.innerWidth-260)+'px';
+  tip.style.top = y+'px';
+}
+function hideTip(){ document.getElementById('tooltip').style.display='none'; }
+
+function hbar(svgId, data, accentVar){
+  const svg = document.getElementById(svgId);
+  const W=640,H=230, left=96, right=70, top=10, bottom=10;
+  const n = data.length;
+  const rowH = (H-top-bottom)/n;
+  const max = Math.max(...data.map(d=>d.value), 1);
+  const accent = getComputedStyle(document.documentElement).getPropertyValue(accentVar).trim();
+  let s = `<g>`;
+  // gridlines at 0,25,50,75,100%
+  for(let g=0;g<=4;g++){
+    const gx = left + (W-left-right)*g/4;
+    s += `<line class="grid-line" x1="${gx}" y1="${top-2}" x2="${gx}" y2="${H-bottom+2}" />`;
+  }
+  data.forEach((d,i)=>{
+    const y = top + i*rowH + rowH*0.22;
+    const bh = rowH*0.56;
+    const w = Math.max((d.value/max)*(W-left-right), 3);
+    s += `<text x="${left-8}" y="${y+bh/2+4}" text-anchor="end" class="bar-label">${d.label}</text>`;
+    s += `<rect data-tip="${d.label}|${fmtManwon(d.value)}/㎡|${d.n}건" x="${left}" y="${y}" width="${w}" height="${bh}" rx="4" fill="${accent}" class="hist-bar"/>`;
+    s += `<text x="${left+w+8}" y="${y+bh/2+4}" class="bar-value">${fmtManwon(d.value)}</text>`;
+  });
+  s += `</g>`;
+  svg.innerHTML = s;
+  attachBarTips(svg);
+}
+
+function attachBarTips(svg){
+  svg.querySelectorAll('[data-tip]').forEach(el=>{
+    el.addEventListener('mousemove', (e)=>{
+      const [label,val,n] = el.dataset.tip.split('|');
+      showTip(`<b>${label}</b><br>평균 ${val} · ${n}`, e);
+    });
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+function renderCharts(){
+  const byDong = {};
+  DONG_ORDER.forEach(d=>byDong[d]={sum:0,cnt:0});
+  rows.forEach(r=>{ if(byDong[r.dong] && r.p2026!==null){ byDong[r.dong].sum+=r.p2026; byDong[r.dong].cnt++; } });
+  const dongData = DONG_ORDER.map(d=>({label:d, value: byDong[d].cnt? byDong[d].sum/byDong[d].cnt:0, n: byDong[d].cnt+'건'}))
+    .filter(d=>d.n!=='0건').sort((a,b)=>b.value-a.value);
+  hbar('chartDong', dongData, '--accent');
+
+  const byJimok = {};
+  rows.forEach(r=>{
+    if(!r.jimok || r.p2026===null) return;
+    byJimok[r.jimok] = byJimok[r.jimok] || {sum:0,cnt:0};
+    byJimok[r.jimok].sum += r.p2026; byJimok[r.jimok].cnt++;
+  });
+  const jimokData = Object.entries(byJimok).map(([k,v])=>({label:(JIMOK_NAME[k]||k), value:v.sum/v.cnt, n:v.cnt+'건'}))
+    .sort((a,b)=>b.value-a.value);
+  hbar('chartJimok', jimokData, '--accent');
+
+  renderHist();
+}
+
+function renderHist(){
+  const bins = [
+    {lo:-Infinity, hi:-50, label:'≤-50%'},
+    {lo:-50, hi:-15, label:'-50~-15%'},
+    {lo:-15, hi:-5, label:'-15~-5%'},
+    {lo:-5, hi:5, label:'-5~+5%'},
+    {lo:5, hi:15, label:'+5~15%'},
+    {lo:15, hi:50, label:'+15~50%'},
+    {lo:50, hi:Infinity, label:'≥+50%'},
+  ];
+  const pcts = rows.map(r=>r.pct).filter(v=>v!==null);
+  bins.forEach(b=> b.count = pcts.filter(p=>p>=b.lo && p<b.hi).length);
+
+  const svg = document.getElementById('chartHist');
+  const W=980,H=220, left=40, right=20, top=24, bottom=36;
+  const max = Math.max(...bins.map(b=>b.count),1);
+  const bw = (W-left-right)/bins.length;
+  const down = getComputedStyle(document.documentElement).getPropertyValue('--div-down').trim();
+  const up = getComputedStyle(document.documentElement).getPropertyValue('--div-up').trim();
+  const neutral = getComputedStyle(document.documentElement).getPropertyValue('--div-neutral').trim();
+
+  let s='';
+  for(let g=0;g<=3;g++){
+    const gy = top + (H-top-bottom)*(1-g/3);
+    s += `<line class="grid-line" x1="${left}" y1="${gy}" x2="${W-right}" y2="${gy}"/>`;
+    s += `<text x="${left-8}" y="${gy+3}" text-anchor="end" class="axis-text">${Math.round(max*g/3)}</text>`;
+  }
+  bins.forEach((b,i)=>{
+    const h = (b.count/max)*(H-top-bottom);
+    const x = left + i*bw + bw*0.12;
+    const w = bw*0.76;
+    const y = H-bottom-h;
+    const color = b.hi<=0 ? down : (b.lo>=0 ? up : neutral);
+    s += `<rect data-tip="${b.label}|${b.count}건" x="${x}" y="${y}" width="${w}" height="${Math.max(h,2)}" rx="4" fill="${color}" class="hist-bar"/>`;
+    if(b.count>0) s += `<text x="${x+w/2}" y="${y-6}" text-anchor="middle" class="bar-value">${b.count}</text>`;
+    s += `<text x="${x+w/2}" y="${H-bottom+16}" text-anchor="middle" class="axis-text">${b.label}</text>`;
+  });
+  svg.innerHTML = s;
+  attachBarTips(svg);
+}
+
+function renderFindings(){
+  const list = document.getElementById('findingsList');
+  const entries = [...flaggedMap.entries()].map(([idx,flags])=>{
+    const r = rows.find(x=>x.idx===idx);
+    const sev = flags.some(f=>f.sev==='critical') ? 'critical':'warning';
+    return {idx, r, flags, sev};
+  }).sort((a,b)=> (a.sev===b.sev? a.idx-b.idx : (a.sev==='critical'?-1:1)) );
+
+  document.getElementById('findingCount').textContent = entries.length+'건';
+  if(entries.length===0){ list.innerHTML = '<p style="color:var(--ink-muted); font-size:12.5px;">검증 플래그가 없습니다.</p>'; return; }
+
+  list.innerHTML = entries.map(e=>`
+    <div class="finding ${e.sev}" data-idx="${e.idx}" tabindex="0" role="button">
+      <span class="sev-stripe"></span>
+      <span class="loc">${e.r.dong||'(법정동 결측)'} ${e.r.jibun||''}<span>연번 ${e.idx}</span></span>
+      <span class="reasons">${e.flags.map(f=>`<em>${f.msg}</em>`).join(' · ')}</span>
+      <span class="sevtag"><span class="chip ${e.sev}">${e.sev==='critical'?'심각':'주의'}</span></span>
+    </div>`).join('');
+
+  list.querySelectorAll('.finding').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.getElementById('searchInput').value='';
+      selectedRegionKey=null; selectedDongList=null; syncDongUI();
+      document.getElementById('flagOnlyToggle').classList.add('active');
+      sortKey='idx'; sortDir=1; visibleCount=50;
+      renderTable(true);
+      document.querySelector('.table-wrap').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  });
+}
+
+function getFiltered(){
+  const q = document.getElementById('searchInput').value.trim();
+  const dongSelVal = document.getElementById('dongSelect').value;
+  const jimokVal = document.getElementById('jimokSelect').value;
+  const flagOnly = document.getElementById('flagOnlyToggle').classList.contains('active');
+  const activeDongList = selectedDongList || (dongSelVal ? [dongSelVal] : null);
+
+  let out = rows.filter(r=>{
+    if(activeDongList && !activeDongList.includes(r.dong)) return false;
+    if(jimokVal && r.jimok!==jimokVal) return false;
+    if(flagOnly && !flaggedMap.has(r.idx)) return false;
+    if(q){
+      const hay = (r.jiju+' '+r.pnu+' '+r.jibun).toLowerCase();
+      if(!hay.includes(q.toLowerCase())) return false;
+    }
+    return true;
+  });
+
+  out.sort((a,b)=>{
+    let va,vb;
+    switch(sortKey){
+      case 'dong': va=a.dong; vb=b.dong; break;
+      case 'jibun': va=a.jibun; vb=b.jibun; break;
+      case 'jimok': va=a.jimok; vb=b.jimok; break;
+      case 'area': va=a.area??-1; vb=b.area??-1; break;
+      case 'zone': va=a.zone; vb=b.zone; break;
+      case 'p2025': va=a.p2025??-1; vb=b.p2025??-1; break;
+      case 'p2026': va=a.p2026??-1; vb=b.p2026??-1; break;
+      case 'pct': va=a.pct??-9999; vb=b.pct??-9999; break;
+      case 'flag': va=sevOf(a.idx)==='critical'?2:sevOf(a.idx)==='warning'?1:0; vb=sevOf(b.idx)==='critical'?2:sevOf(b.idx)==='warning'?1:0; break;
+      default: va=a.idx; vb=b.idx;
+    }
+    if(typeof va==='string') return va.localeCompare(vb)*sortDir;
+    return (va-vb)*sortDir;
+  });
+  return out;
+}
+
+function renderTable(reset){
+  if(reset) visibleCount = Math.max(50, visibleCount===50?50:50);
+  const filtered = getFiltered();
+  const shown = filtered.slice(0, visibleCount);
+  const body = document.getElementById('tableBody');
+  body.innerHTML = shown.map(r=>{
+    const sev = sevOf(r.idx);
+    const rowClass = sev==='critical'?'flag-critical':sev==='warning'?'flag-warning':'';
+    const flagHtml = sev ? `<span class="chip ${sev}" title="${(flaggedMap.get(r.idx)||[]).map(f=>f.msg).join('; ')}">${sev==='critical'?'심각':'주의'}</span>` : '<span class="chip good">정상</span>';
+    return `<tr class="${rowClass}">
+      <td class="num">${r.idx}</td>
+      <td>${r.dong||'<span style="color:var(--critical)">결측</span>'}</td>
+      <td>${r.jibun||'—'}</td>
+      <td title="${JIMOK_NAME[r.jimok]||''}">${r.jimok||'—'}</td>
+      <td class="num">${r.area!=null? r.area.toLocaleString('ko-KR'): '—'}</td>
+      <td>${r.zone||'—'}</td>
+      <td class="num">${fmtWon(r.p2025)}</td>
+      <td class="num">${fmtWon(r.p2026)}</td>
+      <td class="num" style="color:${r.pct==null?'inherit':(r.pct>=0?'var(--div-up)':'var(--div-down)')}">${fmtPct(r.pct)}</td>
+      <td>${flagHtml}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rowCountLabel').textContent = `${shown.length.toLocaleString('ko-KR')} / ${filtered.length.toLocaleString('ko-KR')}건 표시 (전체 ${rows.length}건)`;
+  document.getElementById('moreBtn').disabled = shown.length>=filtered.length;
+}
+</script>
